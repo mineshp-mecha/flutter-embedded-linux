@@ -69,6 +69,9 @@ void FlutterELinuxView::SetEngine(std::unique_ptr<FlutterELinuxEngine> engine) {
       std::make_unique<flutter::KeyeventPlugin>(internal_plugin_messenger);
   textinput_handler_ = std::make_unique<flutter::TextInputPlugin>(
       internal_plugin_messenger, binding_handler_.get());
+  keyboard_purpose_handler_ =
+      std::make_unique<flutter::KeyboardPurposePlugin>(internal_plugin_messenger,
+                                                     binding_handler_.get());
   platform_handler_ = std::make_unique<flutter::PlatformPlugin>(
       internal_plugin_messenger, binding_handler_.get());
   cursor_handler_ = std::make_unique<flutter::MouseCursorPlugin>(

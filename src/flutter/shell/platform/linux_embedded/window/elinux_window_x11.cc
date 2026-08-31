@@ -186,6 +186,10 @@ void ELinuxWindowX11::UpdateVirtualKeyboardStatus(
   // currently not supported.
 }
 
+void ELinuxWindowX11::SetKeyboardPurposeOverride(const std::string& purpose) {
+  (void)purpose;
+}
+
 std::string ELinuxWindowX11::GetClipboardData() {
   return clipboard_data_;
 }
