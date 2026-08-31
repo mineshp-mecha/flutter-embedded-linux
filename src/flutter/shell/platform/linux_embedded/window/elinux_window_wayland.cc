@@ -1311,7 +1311,7 @@ void ELinuxWindowWayland::SetKeyboardPurposeOverride(
     keyboard_purpose_override_ = "normal";
   }
 
-  if (is_requested_show_virtual_keyboard_ && text_input_v3_entered_) {
+  if (is_requested_show_virtual_keyboard_) {
     ShowVirtualKeyboard();
   }
 }
@@ -1565,9 +1565,7 @@ void ELinuxWindowWayland::UpdateVirtualKeyboardStatus(
   text_input_type_ = input_type;
   is_requested_show_virtual_keyboard_ = show;
   if (is_requested_show_virtual_keyboard_) {
-    if (text_input_v3_entered_ || !zwp_text_input_v3_) {
-      ShowVirtualKeyboard();
-    }
+    ShowVirtualKeyboard();
   } else {
     DismissVirtualKeybaord();
   }
@@ -1942,9 +1940,7 @@ void ELinuxWindowWayland::ShowVirtualKeyboard() {
       text_input_v3_enabled_ = true;
     }
 
-    // Map Flutter input types to Wayland content purposes. The terminal
-    // override is intentionally higher priority than the public Flutter enum
-    // because Flutter does not expose a terminal-specific TextInputType.
+    // Map Flutter input types to Wayland content purposes.
     uint32_t hint = ZWP_TEXT_INPUT_V3_CONTENT_HINT_NONE;
     uint32_t purpose = ZWP_TEXT_INPUT_V3_CONTENT_PURPOSE_NORMAL;
 
@@ -1964,11 +1960,11 @@ void ELinuxWindowWayland::ShowVirtualKeyboard() {
       hint |= ZWP_TEXT_INPUT_V3_CONTENT_HINT_MULTILINE;
     }
 
-    zwp_text_input_v3_set_content_type(zwp_text_input_v3_, hint, purpose);
+    zwp_text_input_v3_set_content_type(zwp_text_input_v3_, hint,
+                                       purpose);  // Untested code path
     zwp_text_input_v3_commit(zwp_text_input_v3_);
   } else {
     if (native_window_) {
-      ELINUX_LOG(INFO) << "Using text-input-v1";
       // Map Flutter input types to Wayland v1 content purposes.
       uint32_t hint = ZWP_TEXT_INPUT_V1_CONTENT_HINT_NONE;
       uint32_t purpose = ZWP_TEXT_INPUT_V1_CONTENT_PURPOSE_NORMAL;
