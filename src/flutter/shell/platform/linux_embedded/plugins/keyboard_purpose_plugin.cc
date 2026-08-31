@@ -35,39 +35,18 @@ KeyboardPurposePlugin::KeyboardPurposePlugin(BinaryMessenger* messenger,
 void KeyboardPurposePlugin::HandleMethodCall(
     const MethodCall<EncodableValue>& method_call,
     std::unique_ptr<MethodResult<EncodableValue>> result) {
-  const std::string& method = method_call.method_name();
-  if (method.compare(kSetPurposeMethod) != 0) {
+  if (method_call.method_name() != kSetPurposeMethod) {
     result->NotImplemented();
     return;
   }
 
-  if (!method_call.arguments()) {
-    result->Error("Argument error", "Missing purpose argument.");
+  const auto* arguments = std::get_if<std::string>(method_call.arguments());
+  if (!arguments) {
+    result->Error("Argument error", "Missing or unsupported purpose argument type.");
     return;
   }
 
-  const auto& arguments = *method_call.arguments();
-
-  if (std::holds_alternative<std::string>(arguments)) {
-    delegate_->SetKeyboardPurposeOverride(std::get<std::string>(arguments));
-    result->Success();
-    return;
-  }
-
-  if (std::holds_alternative<EncodableMap>(arguments)) {
-    const auto& map = std::get<EncodableMap>(arguments);
-    const auto purpose_it = map.find(EncodableValue(std::string(kPurposeKey)));
-    if (purpose_it == map.end()) {
-      result->Error("Argument error", "Missing purpose value.");
-      return;
-    }
-    const auto& purpose = std::get<std::string>(purpose_it->second);
-    delegate_->SetKeyboardPurposeOverride(purpose);
-    result->Success();
-    return;
-  }
-
-  result->Error("Argument error", "Unsupported purpose argument type.");
+  delegate_->SetKeyboardPurposeOverride(*arguments);
+  result->Success();
 }
-
 }  // namespace flutter
