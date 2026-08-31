@@ -152,6 +152,7 @@ set(ELINUX_COMMON_SRC
   "src/flutter/shell/platform/linux_embedded/flutter_elinux_texture_registrar.cc"
   "src/flutter/shell/platform/linux_embedded/plugins/keyboard_glfw_util.cc"
   "src/flutter/shell/platform/linux_embedded/plugins/key_event_plugin.cc"
+  "src/flutter/shell/platform/linux_embedded/plugins/keyboard_purpose_plugin.cc"
   "src/flutter/shell/platform/linux_embedded/plugins/lifecycle_plugin.cc"
   "src/flutter/shell/platform/linux_embedded/plugins/mouse_cursor_plugin.cc"
   "src/flutter/shell/platform/linux_embedded/plugins/navigation_plugin.cc"

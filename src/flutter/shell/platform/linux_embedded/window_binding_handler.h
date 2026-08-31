@@ -77,6 +77,12 @@ class WindowBindingHandler {
       const bool show,
       const std::string& input_type = "") = 0;
 
+  // Overrides the keyboard content purpose for terminal-like input.
+  // Implementations may ignore this if the backend does not support it.
+  virtual void SetKeyboardPurposeOverride(const std::string& purpose) {
+    (void)purpose;
+  }
+
   // Returns the clipboard data.
   virtual std::string GetClipboardData() = 0;
 

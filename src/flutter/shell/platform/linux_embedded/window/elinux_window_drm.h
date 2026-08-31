@@ -260,6 +260,11 @@ class ELinuxWindowDrm : public ELinuxWindow, public WindowBindingHandler {
   }
 
   // |FlutterWindowBindingHandler|
+  void SetKeyboardPurposeOverride(const std::string& purpose) override {
+    (void)purpose;
+  }
+
+  // |FlutterWindowBindingHandler|
   std::string GetClipboardData() override { return clipboard_data_; }
 
   // |FlutterWindowBindingHandler|

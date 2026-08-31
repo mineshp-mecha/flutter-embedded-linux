@@ -915,9 +915,11 @@ const zwp_text_input_v3_listener ELinuxWindowWayland::kZwpTextInputV3Listener =
                     wl_surface* surface) -> void {
           ELINUX_LOG(TRACE) << "zwp_text_input_v3_listener.enter";
 
-          // To appear the on-screen keyboard when the user returns to a Flutter
-          // app which needs to show the on-screen keyboard.
+          // The compositor only associates the text-input object with the active
+          // surface after this event. Defer keyboard activation until we've
+          // actually received focus.
           auto self = reinterpret_cast<ELinuxWindowWayland*>(data);
+          self->text_input_v3_entered_ = true;
           if (self->is_requested_show_virtual_keyboard_) {
             self->ShowVirtualKeyboard();
           }
@@ -926,6 +928,9 @@ const zwp_text_input_v3_listener ELinuxWindowWayland::kZwpTextInputV3Listener =
                     zwp_text_input_v3* zwp_text_input_v3,
                     wl_surface* surface) -> void {
           ELINUX_LOG(TRACE) << "zwp_text_input_v3_listener.leave";
+          auto self = reinterpret_cast<ELinuxWindowWayland*>(data);
+          self->text_input_v3_entered_ = false;
+          self->text_input_v3_enabled_ = false;
         },
         .preedit_string = [](void* data,
                              zwp_text_input_v3* zwp_text_input_v3,
@@ -1095,7 +1100,9 @@ ELinuxWindowWayland::ELinuxWindowWayland(
       zwp_text_input_v3_(nullptr),
       wp_presentation_(nullptr),
       wp_presentation_clk_id_(UINT32_MAX),
-      window_decorations_(nullptr) {
+      window_decorations_(nullptr) {    if (text_input_v3_entered_ || !zwp_text_input_v3_) {
+      ShowVirtualKeyboard();
+    }
   view_properties_ = view_properties;
   current_scale_ =
       view_properties.force_scale_factor ? view_properties.scale_factor : 1.0;
@@ -1296,6 +1303,19 @@ ELinuxWindowWayland::~ELinuxWindowWayland() {
 
 void ELinuxWindowWayland::SetView(WindowBindingHandlerDelegate* window) {
   binding_handler_delegate_ = window;
+}
+
+void ELinuxWindowWayland::SetKeyboardPurposeOverride(
+    const std::string& purpose) {
+  if (purpose == "terminal" || purpose == "normal") {
+    keyboard_purpose_override_ = purpose;
+  } else {
+    keyboard_purpose_override_ = "normal";
+  }
+
+  if (is_requested_show_virtual_keyboard_ && text_input_v3_entered_) {
+    ShowVirtualKeyboard();
+  }
 }
 
 ELinuxRenderSurfaceTarget* ELinuxWindowWayland::GetRenderSurfaceTarget() const {
@@ -1547,7 +1567,9 @@ void ELinuxWindowWayland::UpdateVirtualKeyboardStatus(
   text_input_type_ = input_type;
   is_requested_show_virtual_keyboard_ = show;
   if (is_requested_show_virtual_keyboard_) {
-    ShowVirtualKeyboard();
+    if (text_input_v3_entered_ || !zwp_text_input_v3_) {
+      ShowVirtualKeyboard();
+    }
   } else {
     DismissVirtualKeybaord();
   }
@@ -1909,18 +1931,30 @@ wl_cursor* ELinuxWindowWayland::GetWlCursor(const std::string& cursor_name,
 }
 
 void ELinuxWindowWayland::ShowVirtualKeyboard() {
+  ELINUX_LOG(INFO) << "ShowVirtualKeyboard: type = " << text_input_type_;
   if (zwp_text_input_v3_) {
-    // I'm not sure the reason, but enable needs to be called twice.
-    zwp_text_input_v3_enable(zwp_text_input_v3_);
-    zwp_text_input_v3_commit(zwp_text_input_v3_);
-    zwp_text_input_v3_enable(zwp_text_input_v3_);
-    zwp_text_input_v3_commit(zwp_text_input_v3_);
+    if (!text_input_v3_entered_) {
+      ELINUX_LOG(INFO)
+          << "Deferring text-input-v3 activation until after enter() for the "
+             "surface";
+      return;
+    }
 
-    // Map Flutter input types to Wayland content purposes.
+    ELINUX_LOG(INFO) << "Using text-input-v3";
+    if (!text_input_v3_enabled_) {
+      zwp_text_input_v3_enable(zwp_text_input_v3_);
+      text_input_v3_enabled_ = true;
+    }
+
+    // Map Flutter input types to Wayland content purposes. The terminal
+    // override is intentionally higher priority than the public Flutter enum
+    // because Flutter does not expose a terminal-specific TextInputType.
     uint32_t hint = ZWP_TEXT_INPUT_V3_CONTENT_HINT_NONE;
     uint32_t purpose = ZWP_TEXT_INPUT_V3_CONTENT_PURPOSE_NORMAL;
 
-    if (text_input_type_ == "TextInputType.number") {
+    if (keyboard_purpose_override_ == "terminal") {
+      purpose = ZWP_TEXT_INPUT_V3_CONTENT_PURPOSE_TERMINAL;
+    } else if (text_input_type_ == "TextInputType.number") {
       purpose = ZWP_TEXT_INPUT_V3_CONTENT_PURPOSE_NUMBER;
     } else if (text_input_type_ == "TextInputType.phone") {
       purpose = ZWP_TEXT_INPUT_V3_CONTENT_PURPOSE_PHONE;
@@ -1934,11 +1968,13 @@ void ELinuxWindowWayland::ShowVirtualKeyboard() {
       hint |= ZWP_TEXT_INPUT_V3_CONTENT_HINT_MULTILINE;
     }
 
-    zwp_text_input_v3_set_content_type(zwp_text_input_v3_, hint,
-                                       purpose);  // Untested code path
+    ELINUX_LOG(INFO) << "text-input-v3: hint = " << hint
+                    << ", purpose = " << purpose;
+    zwp_text_input_v3_set_content_type(zwp_text_input_v3_, hint, purpose);
     zwp_text_input_v3_commit(zwp_text_input_v3_);
   } else {
     if (native_window_) {
+      ELINUX_LOG(INFO) << "Using text-input-v1";
       // Map Flutter input types to Wayland v1 content purposes.
       uint32_t hint = ZWP_TEXT_INPUT_V1_CONTENT_HINT_NONE;
       uint32_t purpose = ZWP_TEXT_INPUT_V1_CONTENT_PURPOSE_NORMAL;
@@ -1957,20 +1993,29 @@ void ELinuxWindowWayland::ShowVirtualKeyboard() {
         hint |= ZWP_TEXT_INPUT_V1_CONTENT_HINT_MULTILINE;
       }
 
+      ELINUX_LOG(INFO) << "text-input-v1: hint = " << hint
+                      << ", purpose = " << purpose;
       zwp_text_input_v1_activate(zwp_text_input_v1_,
                                  seat_inputs_map_.begin()->first,
                                  native_window_->Surface());
       zwp_text_input_v1_set_content_type(zwp_text_input_v1_, hint, purpose);
       zwp_text_input_v1_commit_state(zwp_text_input_v1_, ++text_input_serial_);
       zwp_text_input_v1_show_input_panel(zwp_text_input_v1_);
+    } else {
+      ELINUX_LOG(WARNING)
+          << "ShowVirtualKeyboard: No native window available for text-input-v1";
     }
   }
 }
 
 void ELinuxWindowWayland::DismissVirtualKeybaord() {
   if (zwp_text_input_v3_) {
+    if (!text_input_v3_enabled_) {
+      return;
+    }
     zwp_text_input_v3_disable(zwp_text_input_v3_);
     zwp_text_input_v3_commit(zwp_text_input_v3_);
+    text_input_v3_enabled_ = false;
   } else {
     zwp_text_input_v1_deactivate(zwp_text_input_v1_,
                                  seat_inputs_map_.begin()->first);

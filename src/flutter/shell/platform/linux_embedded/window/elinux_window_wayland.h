@@ -63,6 +63,8 @@ class ELinuxWindowWayland : public ELinuxWindow, public WindowBindingHandler {
   // |FlutterWindowBindingHandler|
   void SetView(WindowBindingHandlerDelegate* view) override;
 
+  void SetKeyboardPurposeOverride(const std::string& purpose);
+
   // |FlutterWindowBindingHandler|
   ELinuxRenderSurfaceTarget* GetRenderSurfaceTarget() const override;
 
@@ -166,6 +168,12 @@ class ELinuxWindowWayland : public ELinuxWindow, public WindowBindingHandler {
   // Indicates that exists a keyboard show request from Flutter Engine.
   bool is_requested_show_virtual_keyboard_;
 
+  // Wayland text-input v3 is only activated after the compositor reports focus
+  // via zwp_text_input_v3.enter(). Until then, state updates are not associated
+  // with a real input target and can be ignored by the compositor.
+  bool text_input_v3_entered_ = false;
+  bool text_input_v3_enabled_ = false;
+
   wl_display* wl_display_;
   wl_registry* wl_registry_;
   wl_compositor* wl_compositor_;
@@ -219,6 +227,10 @@ class ELinuxWindowWayland : public ELinuxWindow, public WindowBindingHandler {
 
   // The current text input type (e.g., "TextInputType.number").
   std::string text_input_type_;
+
+  // Overrides the text-input content purpose independently of Flutter's public
+  // TextInputType enum. This is used for terminal inputs on Wayland.
+  std::string keyboard_purpose_override_ = "normal";
 
   uint32_t text_input_serial_;
 };
