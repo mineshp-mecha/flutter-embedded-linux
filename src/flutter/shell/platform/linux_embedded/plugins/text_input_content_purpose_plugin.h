@@ -1,9 +1,5 @@
-// Copyright 2023 Sony Corporation. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-#ifndef FLUTTER_SHELL_PLATFORM_LINUX_EMBEDDED_PLUGINS_KEYBOARD_PURPOSE_PLUGIN_H_
-#define FLUTTER_SHELL_PLATFORM_LINUX_EMBEDDED_PLUGINS_KEYBOARD_PURPOSE_PLUGIN_H_
+#ifndef FLUTTER_SHELL_PLATFORM_LINUX_EMBEDDED_PLUGINS_CONTENT_PURPOSE_PLUGIN_H_
+#define FLUTTER_SHELL_PLATFORM_LINUX_EMBEDDED_PLUGINS_CONTENT_PURPOSE_PLUGIN_H_
 
 #include <memory>
 
@@ -14,10 +10,10 @@
 
 namespace flutter {
 
-class KeyboardPurposePlugin {
+class TextInputContentPurposePlugin {
  public:
-  KeyboardPurposePlugin(BinaryMessenger* messenger, WindowBindingHandler* delegate);
-  ~KeyboardPurposePlugin() = default;
+  TextInputContentPurposePlugin(BinaryMessenger* messenger, WindowBindingHandler* delegate);
+  ~TextInputContentPurposePlugin() = default;
 
  private:
   void HandleMethodCall(
@@ -30,4 +26,4 @@ class KeyboardPurposePlugin {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_LINUX_EMBEDDED_PLUGINS_KEYBOARD_PURPOSE_PLUGIN_H_
+#endif  // FLUTTER_SHELL_PLATFORM_LINUX_EMBEDDED_PLUGINS_CONTENT_PURPOSE_PLUGIN_H_

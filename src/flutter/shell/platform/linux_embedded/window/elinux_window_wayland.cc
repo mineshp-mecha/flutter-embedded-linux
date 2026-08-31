@@ -1303,12 +1303,12 @@ void ELinuxWindowWayland::SetView(WindowBindingHandlerDelegate* window) {
   binding_handler_delegate_ = window;
 }
 
-void ELinuxWindowWayland::SetKeyboardPurposeOverride(
+void ELinuxWindowWayland::SetTextInputContentPurposeOverride(
     const std::string& purpose) {
   if (purpose == "terminal" || purpose == "normal") {
-    keyboard_purpose_override_ = purpose;
+    text_input_content_purpose_override_ = purpose;
   } else {
-    keyboard_purpose_override_ = "normal";
+    text_input_content_purpose_override_ = "normal";
   }
 
   if (is_requested_show_virtual_keyboard_) {
@@ -1944,7 +1944,7 @@ void ELinuxWindowWayland::ShowVirtualKeyboard() {
     uint32_t hint = ZWP_TEXT_INPUT_V3_CONTENT_HINT_NONE;
     uint32_t purpose = ZWP_TEXT_INPUT_V3_CONTENT_PURPOSE_NORMAL;
 
-    if (keyboard_purpose_override_ == "terminal") {
+    if (text_input_content_purpose_override_ == "terminal") {
       purpose = ZWP_TEXT_INPUT_V3_CONTENT_PURPOSE_TERMINAL;
     } else if (text_input_type_ == "TextInputType.number") {
       purpose = ZWP_TEXT_INPUT_V3_CONTENT_PURPOSE_NUMBER;
