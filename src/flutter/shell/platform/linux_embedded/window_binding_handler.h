@@ -79,7 +79,7 @@ class WindowBindingHandler {
 
   // Overrides the keyboard content purpose for terminal-like input.
   // Implementations may ignore this if the backend does not support it.
-  virtual void SetKeyboardPurposeOverride(const std::string& purpose) {
+  virtual void SetTextInputContentPurposeOverride(const std::string& purpose) {
     (void)purpose;
   }
 

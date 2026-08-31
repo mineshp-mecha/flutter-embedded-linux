@@ -59,7 +59,7 @@ class ELinuxWindowX11 : public ELinuxWindow, public WindowBindingHandler {
                                    const std::string& input_type = "") override;
 
   // |FlutterWindowBindingHandler|
-  void SetKeyboardPurposeOverride(const std::string& purpose) override;
+  void SetTextInputContentPurposeOverride(const std::string& purpose) override;
 
   // |FlutterWindowBindingHandler|
   std::string GetClipboardData() override;

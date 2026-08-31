@@ -186,7 +186,7 @@ void ELinuxWindowX11::UpdateVirtualKeyboardStatus(
   // currently not supported.
 }
 
-void ELinuxWindowX11::SetKeyboardPurposeOverride(const std::string& purpose) {
+void ELinuxWindowX11::SetTextInputContentPurposeOverride(const std::string& purpose) {
   (void)purpose;
 }
 
