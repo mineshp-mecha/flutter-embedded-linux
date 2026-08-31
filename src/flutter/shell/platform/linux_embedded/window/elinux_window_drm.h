@@ -260,7 +260,7 @@ class ELinuxWindowDrm : public ELinuxWindow, public WindowBindingHandler {
   }
 
   // |FlutterWindowBindingHandler|
-  void SetKeyboardPurposeOverride(const std::string& purpose) override {
+  void SetTextInputContentPurposeOverride(const std::string& purpose) override {
     (void)purpose;
   }
 

@@ -42,7 +42,7 @@ void TextInputContentPurposePlugin::HandleMethodCall(
     return;
   }
 
-  delegate_->SetKeyboardPurposeOverride(*arguments);
+  delegate_->SetTextInputContentPurposeOverride(*arguments);
   result->Success();
 }
 }  // namespace flutter
