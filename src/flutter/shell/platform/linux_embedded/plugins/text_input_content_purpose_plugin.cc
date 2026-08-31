@@ -1,8 +1,4 @@
-// Copyright 2023 Sony Corporation. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-#include "flutter/shell/platform/linux_embedded/plugins/keyboard_purpose_plugin.h"
+#include "flutter/shell/platform/linux_embedded/plugins/text_input_content_purpose_plugin.h"
 
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_method_codec.h"
 
@@ -13,13 +9,13 @@
 namespace flutter {
 
 namespace {
-constexpr char kChannelName[] = "mechanix/keyboard_purpose";
-constexpr char kSetPurposeMethod[] = "setPurpose";
+constexpr char kChannelName[] = "mechanix/text_input_content_purpose";
+constexpr char kSetPurposeMethod[] = "setTextInputContentPurpose";
 constexpr char kPurposeKey[] = "purpose";
 }  // namespace
 
-KeyboardPurposePlugin::KeyboardPurposePlugin(BinaryMessenger* messenger,
-                                             WindowBindingHandler* delegate)
+TextInputContentPurposePlugin::TextInputContentPurposePlugin(BinaryMessenger* messenger,
+                                           WindowBindingHandler* delegate)
     : channel_(std::make_unique<MethodChannel<EncodableValue>>(
           messenger,
           kChannelName,
@@ -32,7 +28,7 @@ KeyboardPurposePlugin::KeyboardPurposePlugin(BinaryMessenger* messenger,
       });
 }
 
-void KeyboardPurposePlugin::HandleMethodCall(
+void TextInputContentPurposePlugin::HandleMethodCall(
     const MethodCall<EncodableValue>& method_call,
     std::unique_ptr<MethodResult<EncodableValue>> result) {
   if (method_call.method_name() != kSetPurposeMethod) {

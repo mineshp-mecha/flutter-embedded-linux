@@ -14,7 +14,7 @@
 #include "flutter/shell/platform/linux_embedded/flutter_elinux_engine.h"
 #include "flutter/shell/platform/linux_embedded/flutter_elinux_state.h"
 #include "flutter/shell/platform/linux_embedded/plugins/key_event_plugin.h"
-#include "flutter/shell/platform/linux_embedded/plugins/keyboard_purpose_plugin.h"
+#include "flutter/shell/platform/linux_embedded/plugins/text_input_content_purpose_plugin.h"
 #include "flutter/shell/platform/linux_embedded/plugins/lifecycle_plugin.h"
 #include "flutter/shell/platform/linux_embedded/plugins/mouse_cursor_plugin.h"
 #include "flutter/shell/platform/linux_embedded/plugins/navigation_plugin.h"
@@ -289,8 +289,8 @@ class FlutterELinuxView : public WindowBindingHandlerDelegate {
   // Handler for text input events from window.
   std::unique_ptr<flutter::TextInputPlugin> textinput_handler_;
 
-  // Handler for custom terminal keyboard purpose updates from app code.
-  std::unique_ptr<flutter::KeyboardPurposePlugin> keyboard_purpose_handler_;
+  // Handler for app-requested text-input content purpose overrides.
+  std::unique_ptr<flutter::TextInputContentPurposePlugin> textinput_content_purpose_handler_;
 
   // Handler for the flutter/platform channel.
   std::unique_ptr<flutter::PlatformPlugin> platform_handler_;

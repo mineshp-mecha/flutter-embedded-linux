@@ -63,7 +63,7 @@ class ELinuxWindowWayland : public ELinuxWindow, public WindowBindingHandler {
   // |FlutterWindowBindingHandler|
   void SetView(WindowBindingHandlerDelegate* view) override;
 
-  void SetKeyboardPurposeOverride(const std::string& purpose);
+  void SetTextInputContentPurposeOverride(const std::string& purpose);
 
   // |FlutterWindowBindingHandler|
   ELinuxRenderSurfaceTarget* GetRenderSurfaceTarget() const override;
@@ -230,7 +230,7 @@ class ELinuxWindowWayland : public ELinuxWindow, public WindowBindingHandler {
 
   // Overrides the text-input content purpose independently of Flutter's public
   // TextInputType enum. This is used for terminal inputs on Wayland.
-  std::string keyboard_purpose_override_ = "normal";
+  std::string text_input_content_purpose_override_ = "normal";
 
   uint32_t text_input_serial_;
 };
