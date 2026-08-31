@@ -1100,9 +1100,7 @@ ELinuxWindowWayland::ELinuxWindowWayland(
       zwp_text_input_v3_(nullptr),
       wp_presentation_(nullptr),
       wp_presentation_clk_id_(UINT32_MAX),
-      window_decorations_(nullptr) {    if (text_input_v3_entered_ || !zwp_text_input_v3_) {
-      ShowVirtualKeyboard();
-    }
+      window_decorations_(nullptr) {
   view_properties_ = view_properties;
   current_scale_ =
       view_properties.force_scale_factor ? view_properties.scale_factor : 1.0;
@@ -1931,7 +1929,6 @@ wl_cursor* ELinuxWindowWayland::GetWlCursor(const std::string& cursor_name,
 }
 
 void ELinuxWindowWayland::ShowVirtualKeyboard() {
-  ELINUX_LOG(INFO) << "ShowVirtualKeyboard: type = " << text_input_type_;
   if (zwp_text_input_v3_) {
     if (!text_input_v3_entered_) {
       ELINUX_LOG(INFO)
@@ -1940,7 +1937,6 @@ void ELinuxWindowWayland::ShowVirtualKeyboard() {
       return;
     }
 
-    ELINUX_LOG(INFO) << "Using text-input-v3";
     if (!text_input_v3_enabled_) {
       zwp_text_input_v3_enable(zwp_text_input_v3_);
       text_input_v3_enabled_ = true;
@@ -1968,8 +1964,6 @@ void ELinuxWindowWayland::ShowVirtualKeyboard() {
       hint |= ZWP_TEXT_INPUT_V3_CONTENT_HINT_MULTILINE;
     }
 
-    ELINUX_LOG(INFO) << "text-input-v3: hint = " << hint
-                    << ", purpose = " << purpose;
     zwp_text_input_v3_set_content_type(zwp_text_input_v3_, hint, purpose);
     zwp_text_input_v3_commit(zwp_text_input_v3_);
   } else {
@@ -1993,17 +1987,12 @@ void ELinuxWindowWayland::ShowVirtualKeyboard() {
         hint |= ZWP_TEXT_INPUT_V1_CONTENT_HINT_MULTILINE;
       }
 
-      ELINUX_LOG(INFO) << "text-input-v1: hint = " << hint
-                      << ", purpose = " << purpose;
       zwp_text_input_v1_activate(zwp_text_input_v1_,
                                  seat_inputs_map_.begin()->first,
                                  native_window_->Surface());
       zwp_text_input_v1_set_content_type(zwp_text_input_v1_, hint, purpose);
       zwp_text_input_v1_commit_state(zwp_text_input_v1_, ++text_input_serial_);
       zwp_text_input_v1_show_input_panel(zwp_text_input_v1_);
-    } else {
-      ELINUX_LOG(WARNING)
-          << "ShowVirtualKeyboard: No native window available for text-input-v1";
     }
   }
 }
